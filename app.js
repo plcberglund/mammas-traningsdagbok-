@@ -7,27 +7,33 @@ const fmt = (n, dec = 1) => n.toLocaleString('sv-SE', { minimumFractionDigits: d
 
 // Den som bjuder på belöningarna
 const GIVARE = 'Linus';
-
 // Medaljerna är en enda stege efter total sträcka. Täta i början så att
 // första veckan ger flera, sen längre mellan. Städerna är en låtsasresa
-// norrut från Stockholm. Byt gärna ut mot en resa som passar Hjördis.
-// Medaljer med "beloning" ger en riktig present från GIVARE.
+// från Umeå söderut längs E4, via Stockholm och Göteborg ner till Malmö.
+// Sträckorna är ungefärliga bilvägsavstånd från Umeå.
+// Medaljer med "beloning" ger en riktig present från GIVARE. De ska
+// vara svåra att få: runt fem månader, ett år och tre år i lugnt tempo.
 const MEDALJER = [
   { km: 1, namn: 'Första kilometern', ikon: '👟' },
   { km: 5, namn: 'Fem kilometer', ikon: '🌱' },
-  { km: 10, namn: 'En hel mil', ikon: '🥾', beloning: 'en fika' },
+  { km: 10, namn: 'En hel mil', ikon: '🥾' },
   { km: 21.1, namn: 'Halvmaraton', ikon: '🏃‍♀️' },
-  { km: 42.2, namn: 'Maraton', ikon: '🏅', beloning: 'en lunch ute' },
-  { km: 70, namn: 'Framme i Uppsala', ikon: '🏰' },
-  { km: 100, namn: 'Hundra kilometer', ikon: '💯', beloning: 'en biokväll' },
-  { km: 180, namn: 'Framme i Gävle', ikon: '🐐' },
-  { km: 300, namn: 'Framme i Hudiksvall', ikon: '🌊' },
-  { km: 395, namn: 'Framme i Sundsvall', ikon: '🌉' },
-  { km: 500, namn: 'Femhundra kilometer', ikon: '⭐', beloning: 'en utflykt, du väljer vart' },
-  { km: 640, namn: 'Framme i Umeå', ikon: '🌳' },
-  { km: 900, namn: 'Framme i Luleå', ikon: '❄️' },
-  { km: 1000, namn: 'Tusen kilometer', ikon: '🏆', beloning: 'en middag på restaurang' },
-  { km: 1250, namn: 'Framme i Kiruna', ikon: '🌌', beloning: 'en stor överraskning' },
+  { km: 30, namn: 'Framme i Hörnefors', ikon: '🌲' },
+  { km: 42.2, namn: 'Maraton', ikon: '🏅' },
+  { km: 55, namn: 'Framme i Nordmaling', ikon: '🦌' },
+  { km: 100, namn: 'Hundra kilometer', ikon: '💯' },
+  { km: 113, namn: 'Framme i Örnsköldsvik', ikon: '⛰️' },
+  { km: 225, namn: 'Framme i Härnösand', ikon: '⛪', beloning: 'en lunch ute' },
+  { km: 275, namn: 'Framme i Sundsvall', ikon: '🌉' },
+  { km: 360, namn: 'Framme i Hudiksvall', ikon: '🌊' },
+  { km: 485, namn: 'Framme i Gävle', ikon: '🐐' },
+  { km: 585, namn: 'Framme i Uppsala', ikon: '🏰' },
+  { km: 655, namn: 'Framme i Stockholm', ikon: '👑', beloning: 'en utflykt, du väljer vart' },
+  { km: 975, namn: 'Framme i Jönköping', ikon: '🍬' },
+  { km: 1000, namn: 'Tusen kilometer', ikon: '🏆' },
+  { km: 1125, namn: 'Framme i Göteborg', ikon: '⚓' },
+  { km: 1270, namn: 'Framme i Halmstad', ikon: '🏖️' },
+  { km: 1410, namn: 'Framme i Malmö', ikon: '🏙️', beloning: 'en stor överraskning' },
 ].map(m => ({ ...m, valor: m.km < 50 ? 'brons' : m.km < 300 ? 'silver' : m.km < 1000 ? 'guld' : 'diamant' }));
 
 const PEPP = [

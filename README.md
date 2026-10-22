@@ -6,9 +6,9 @@ Appen visar nästa medalj, veckomålet som en ring, totalsiffror, staplar vecka 
 
 ## Medaljer
 
-Medaljerna följer en enda sak: hur långt hon har gått totalt. Första kilometern, fem kilometer, en mil, halvmaraton, maraton och sen städer norrut från Stockholm ända upp till Kiruna. Femton medaljer, täta i början och glesare sen.
+Medaljerna följer en enda sak: hur långt hon har gått totalt. Första kilometern, fem kilometer, en mil, halvmaraton, maraton och sen städer på en låtsasresa från Umeå söderut längs E4, via Stockholm och Göteborg ner till Malmö (cirka 1400 km). Tjugo medaljer, täta i början och glesare sen.
 
-Sex av medaljerna ger en riktig belöning från Linus: en fika vid en mil, lunch ute vid maraton, bio vid 100 km, en utflykt vid 500 km, middag på restaurang vid 1000 km och en stor överraskning i Kiruna. De är märkta med 🎁, och när hon tar en står det "Ring Linus och säg till". Ändra belöningarna i fältet `beloning` och namnet i `GIVARE` i `app.js`.
+Tre av medaljerna ger en riktig belöning från Linus, och de ska vara svåra att få: lunch ute i Härnösand (225 km, runt fem månader), en utflykt i Stockholm (655 km, drygt ett år) och en stor överraskning i Malmö (1410 km, runt tre år). De är märkta med 🎁, och när hon tar en står det "Ring Linus och säg till". Ändra belöningarna i fältet `beloning` och namnet i `GIVARE` i `app.js`.
 
 Kortet "Nästa medalj" visar hur långt det är kvar till nästa. Inga dagar-i-rad eller andra mål som kan brytas, en missad dag kostar ingenting.
 
