@@ -2,15 +2,13 @@
 
 En liten webbapp för promenader på rullbandet framför tv:n. Efter varje pass läser mamma av rullbandet, trycker in km och minuter med stora plus/minus-knappar och trycker på "Jag har gått!". Då kommer konfetti och en pepp-ruta.
 
-Appen visar veckomål som en ring, en låtsasresa genom Sverige (Stockholm till Kiruna), totalsiffror, staplar vecka för vecka, medaljer och de senaste promenaderna.
+Appen visar nästa medalj, veckomålet som en ring, totalsiffror, staplar vecka för vecka, medaljerna och de senaste promenaderna.
 
-## Mål och medaljer
+## Medaljer
 
-Det finns 64 medaljer i åtta kategorier: total sträcka, antal promenader, total tid, längsta pass, dagar i rad, klarade veckomål, veckor i rad och städer längs resan. Varje kategori är en trappa där de första stegen är lätta och de sista tar månader. Medaljerna kommer i brons, silver, guld och diamant.
+Medaljerna följer en enda sak: hur långt hon har gått totalt. Första kilometern, fem kilometer, en mil, halvmaraton, maraton och sen städer norrut från Stockholm ända upp till Kiruna. Femton medaljer, täta i början och glesare sen.
 
-Kortet "Nästa mål" visar de tre medaljer hon är närmast, med en stapel och hur mycket som är kvar. När en ny medalj tas studsar den fram i firandet. Tryck på en medalj för att se när den togs eller vad som krävs.
-
-Datumen räknas fram ur historiken, så de stämmer även om en promenad tas bort i efterhand.
+Kortet "Nästa medalj" visar hur långt det är kvar till nästa. Inga dagar-i-rad eller andra mål som kan brytas, en missad dag kostar ingenting.
 
 ## Köra
 
@@ -25,4 +23,4 @@ Allt sparas i webbläsarens `localStorage` på den enhet mamma använder. Under 
 
 ## Anpassa
 
-Rutten och målen ligger överst i `app.js` (`RUTT` och `KATEGORIER`). Lägg till eller ta bort steg i en `steg`-lista så ändras medaljerna. Byt gärna startpunkt till mammas hemstad eller en resa hon drömmer om.
+Medaljerna ligger överst i `app.js` i listan `MEDALJER`, en rad per medalj med sträcka, namn och ikon. Byt gärna startpunkt till mammas hemstad eller en resa hon drömmer om.

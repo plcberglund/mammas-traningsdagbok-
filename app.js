@@ -4,81 +4,27 @@ const LAGRING = 'mammas-promenader-v1';
 
 const $ = id => document.getElementById(id);
 const fmt = (n, dec = 1) => n.toLocaleString('sv-SE', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-const fmtTal = n => n.toLocaleString('sv-SE', { maximumFractionDigits: 1 });
 
-// Resan räknas i km från start. Byt gärna ut mot en rutt som passar mamma.
-const RUTT = [
-  { namn: 'Stockholm', km: 0 },
-  { namn: 'Sollentuna', km: 15 },
-  { namn: 'Arlanda', km: 40 },
-  { namn: 'Uppsala', km: 70 },
-  { namn: 'Gävle', km: 180 },
-  { namn: 'Hudiksvall', km: 300 },
-  { namn: 'Sundsvall', km: 395 },
-  { namn: 'Örnsköldsvik', km: 510 },
-  { namn: 'Umeå', km: 640 },
-  { namn: 'Skellefteå', km: 775 },
-  { namn: 'Luleå', km: 900 },
-  { namn: 'Kiruna', km: 1250 },
-];
-
-// Varje kategori är en trappa av mål. De första stegen är lätta så att
-// medaljerna kommer tätt i början, sen glesnar de ut.
-const KATEGORIER = [
-  { id: 'km', rubrik: 'Sträcka', ikon: '👣', varde: s => s.totalKm,
-    steg: [1, 5, 10, 21.1, 42.2, 70, 100, 200, 300, 500, 1000],
-    namn: m => ({ 10: 'Första milen', 21.1: 'Halvmaraton', 42.2: 'Maraton' }[m] || fmtTal(m) + ' km'),
-    text: m => `Gå ${fmtTal(m)} km totalt`, kvar: k => fmt(k) + ' km' },
-  { id: 'antal', rubrik: 'Promenader', ikon: '👟', varde: s => s.antal,
-    steg: [1, 5, 10, 25, 50, 75, 100, 150, 200, 365],
-    namn: m => m === 1 ? 'Första promenaden' : m + ' promenader',
-    text: m => m === 1 ? 'Gå din första promenad' : `Gå ${m} promenader`,
-    kvar: k => Math.ceil(k) + (Math.ceil(k) === 1 ? ' promenad' : ' promenader') },
-  { id: 'tid', rubrik: 'Tid', ikon: '⏱️', varde: s => s.totalMin / 60,
-    steg: [1, 5, 10, 25, 50, 100, 200],
-    namn: m => m === 1 ? 'Första timmen' : m + ' timmar',
-    text: m => `Gå ${m} ${m === 1 ? 'timme' : 'timmar'} totalt`, kvar: k => Math.ceil(k * 60) + ' min' },
-  { id: 'langst', rubrik: 'Långpass', ikon: '🌟', varde: s => s.langst,
-    steg: [2, 3, 4, 5, 6, 8, 10],
-    namn: m => m + ' km på en gång', text: m => `Gå ${m} km i ett och samma pass`,
-    kvar: k => fmt(k) + ' km längre' },
-  { id: 'svit', rubrik: 'Dagar i rad', ikon: '🔥', varde: s => s.langstaSvit,
-    steg: [2, 3, 5, 7, 14, 21, 30],
-    namn: m => m + ' dagar i rad', text: m => `Gå ${m} dagar i rad`,
-    kvar: k => Math.ceil(k) + (Math.ceil(k) === 1 ? ' dag till' : ' dagar till'), nu: s => s.nuvarandeSvit },
-  { id: 'veckor', rubrik: 'Veckomål', ikon: '🎯', varde: s => s.veckorMedMal,
-    steg: [1, 4, 8, 12, 26, 52],
-    namn: m => m === 1 ? 'Första veckomålet' : m + ' veckomål',
-    text: m => m === 1 ? 'Klara veckomålet en vecka' : `Klara veckomålet ${m} veckor`,
-    kvar: k => Math.ceil(k) + (Math.ceil(k) === 1 ? ' vecka till' : ' veckor till') },
-  { id: 'veckosvit', rubrik: 'Veckor i rad', ikon: '📅', varde: s => s.langstaVeckoSvit,
-    steg: [2, 4, 8, 13, 26],
-    namn: m => m + ' veckor i rad', text: m => `Klara veckomålet ${m} veckor i rad`,
-    kvar: k => Math.ceil(k) + (Math.ceil(k) === 1 ? ' vecka till' : ' veckor till'), nu: s => s.nuvarandeVeckoSvit },
-];
-
-const VALORER = ['brons', 'silver', 'guld', 'diamant'];
-
-function valorFor(i, antal) {
-  if (i === antal - 1 && antal >= 5) return 'diamant';
-  return VALORER[Math.min(2, Math.floor((i / antal) * 3))];
-}
-
+// Medaljerna är en enda stege efter total sträcka. Täta i början så att
+// första veckan ger flera, sen längre mellan. Städerna är en låtsasresa
+// norrut från Stockholm. Byt gärna ut mot en resa som passar Hjördis.
 const MEDALJER = [
-  ...KATEGORIER.flatMap(k => k.steg.map((m, i) => ({
-    id: k.id + '-' + m, kategori: k.id, ikon: k.ikon, mal: m, valor: valorFor(i, k.steg.length),
-    namn: k.namn(m), text: k.text(m), varde: k.varde, kvar: k.kvar,
-  }))),
-  // En medalj för varje stad längs resan
-  ...RUTT.slice(1).map((stad, i, alla) => ({
-    id: 'stad-' + stad.namn, kategori: 'resa', ikon: '📍', mal: stad.km,
-    valor: i === alla.length - 1 ? 'diamant' : valorFor(i, alla.length - 1),
-    namn: 'Framme i ' + stad.namn, text: `Gå hela vägen till ${stad.namn} (${stad.km} km)`,
-    varde: s => s.totalKm, kvar: k => fmt(k) + ' km',
-  })),
-];
-
-const KATEGORI_NAMN = Object.fromEntries([...KATEGORIER.map(k => [k.id, k.rubrik]), ['resa', 'Resan']]);
+  { km: 1, namn: 'Första kilometern', ikon: '👟' },
+  { km: 5, namn: 'Fem kilometer', ikon: '🌱' },
+  { km: 10, namn: 'En hel mil', ikon: '🥾' },
+  { km: 21.1, namn: 'Halvmaraton', ikon: '🏃‍♀️' },
+  { km: 42.2, namn: 'Maraton', ikon: '🏅' },
+  { km: 70, namn: 'Framme i Uppsala', ikon: '🏰' },
+  { km: 100, namn: 'Hundra kilometer', ikon: '💯' },
+  { km: 180, namn: 'Framme i Gävle', ikon: '🐐' },
+  { km: 300, namn: 'Framme i Hudiksvall', ikon: '🌊' },
+  { km: 395, namn: 'Framme i Sundsvall', ikon: '🌉' },
+  { km: 500, namn: 'Femhundra kilometer', ikon: '⭐' },
+  { km: 640, namn: 'Framme i Umeå', ikon: '🌳' },
+  { km: 900, namn: 'Framme i Luleå', ikon: '❄️' },
+  { km: 1000, namn: 'Tusen kilometer', ikon: '🏆' },
+  { km: 1250, namn: 'Framme i Kiruna', ikon: '🌌' },
+].map(m => ({ ...m, valor: m.km < 50 ? 'brons' : m.km < 300 ? 'silver' : m.km < 1000 ? 'guld' : 'diamant' }));
 
 const PEPP = [
   'Varje steg räknas.',
@@ -139,47 +85,28 @@ function berakna(p = data.promenader) {
     perVecka.set(k, (perVecka.get(k) || 0) + x.km);
   }
   const dennaVecka = perVecka.get(dagNyckel(veckoStart(new Date()))) || 0;
-  const basstaVecka = Math.max(0, ...perVecka.values());
 
-  // Veckor där veckomålet nåddes, och längsta följden av sådana veckor
-  const malVeckor = [...perVecka].filter(([, km]) => km >= data.veckomal).map(([k]) => k).sort();
-  let langstaVeckoSvit = 0, veckoSvit = 0, forraVecka = null;
-  for (const k of malVeckor) {
-    const v = new Date(k);
-    veckoSvit = forraVecka && Math.round((v - forraVecka) / 86400000) === 7 ? veckoSvit + 1 : 1;
-    langstaVeckoSvit = Math.max(langstaVeckoSvit, veckoSvit);
-    forraVecka = v;
-  }
-  // Pågående veckosvit: räknas om förra eller denna vecka nådde målet
-  const sistaMal = malVeckor.length ? new Date(malVeckor[malVeckor.length - 1]) : null;
-  const dennaMandag = new Date(dagNyckel(veckoStart(new Date())));
-  const nuvarandeVeckoSvit = sistaMal && Math.round((dennaMandag - sistaMal) / 86400000) <= 7 ? veckoSvit : 0;
-
-  const dagar = [...new Set(p.map(x => dagNyckel(new Date(x.datum))))].sort();
-  let langstaSvit = 0, svit = 0, forra = null;
-  for (const d of dagar) {
-    const idag = new Date(d);
-    svit = forra && Math.round((idag - forra) / 86400000) === 1 ? svit + 1 : 1;
-    langstaSvit = Math.max(langstaSvit, svit);
-    forra = idag;
-  }
-  // Pågående svit: räknas om senaste dagen är idag eller igår
-  let nuvarandeSvit = 0;
-  if (dagar.length) {
-    const sista = new Date(dagar[dagar.length - 1]);
-    const idag = new Date(dagNyckel(new Date()));
-    if ((idag - sista) / 86400000 <= 1) nuvarandeSvit = svit;
-  }
-
-  return { antal: p.length, totalKm, totalMin, langst, dennaVecka, basstaVecka, perVecka,
-           langstaSvit, nuvarandeSvit, veckorMedMal: malVeckor.length, langstaVeckoSvit, nuvarandeVeckoSvit };
+  return { antal: p.length, totalKm, totalMin, langst, dennaVecka, perVecka };
 }
 
-function resePosition(km) {
-  for (let i = 0; i < RUTT.length - 1; i++) {
-    if (km < RUTT[i + 1].km) return { fran: RUTT[i], till: RUTT[i + 1], klar: false };
+const tagna = km => MEDALJER.filter(m => km >= m.km);
+const nastaMedalj = km => MEDALJER.find(m => km < m.km);
+
+// Vilken dag varje medalj togs, räknat ur historiken. Då stämmer det
+// även om en promenad tas bort i efterhand.
+function medaljDatum() {
+  const sorterade = [...data.promenader].sort((a, b) => a.datum.localeCompare(b.datum));
+  const datum = new Map();
+  let km = 0;
+  for (const x of sorterade) {
+    km += x.km;
+    for (const m of tagna(km)) if (!datum.has(m.km)) datum.set(m.km, x.datum);
   }
-  return { fran: RUTT[RUTT.length - 2], till: RUTT[RUTT.length - 1], klar: true };
+  return datum;
+}
+
+function medaljBild(m, stor = false) {
+  return `<span class="medalj-bild ${m.valor}${stor ? ' stor' : ''}"><span>${m.ikon}</span></span>`;
 }
 
 // ---------- Visning ----------
@@ -188,9 +115,24 @@ function rita() {
   const s = berakna();
 
   $('halsning').textContent = 'Hej ' + data.namn + '!';
-  $('dagens-pepp').textContent = s.nuvarandeSvit >= 2
-    ? `Du har gått ${s.nuvarandeSvit} dagar i rad. Snyggt!`
-    : PEPP[new Date().getDate() % PEPP.length];
+  $('dagens-pepp').textContent = PEPP[new Date().getDate() % PEPP.length];
+
+  // Nästa medalj
+  const nasta = nastaMedalj(s.totalKm);
+  const forra = tagna(s.totalKm).pop();
+  if (nasta) {
+    const fran = forra ? forra.km : 0;
+    const andel = (s.totalKm - fran) / (nasta.km - fran);
+    $('nasta-bild').innerHTML = medaljBild(nasta);
+    $('nasta-namn').textContent = nasta.namn;
+    $('nasta-fylld').style.width = (andel * 100) + '%';
+    $('nasta-text').textContent = `${fmt(nasta.km - s.totalKm)} km kvar`;
+  } else {
+    $('nasta-bild').innerHTML = medaljBild(MEDALJER[MEDALJER.length - 1]);
+    $('nasta-namn').textContent = 'Alla medaljer är dina!';
+    $('nasta-fylld').style.width = '100%';
+    $('nasta-text').textContent = `${fmt(s.totalKm)} km. Helt otroligt.`;
+  }
 
   // Veckoring
   const andel = Math.min(1, s.dennaVecka / data.veckomal);
@@ -206,19 +148,6 @@ function rita() {
       ? 'Veckomålet är klart! Allt du går nu är bonus.'
       : `${fmt(kvar)} km kvar till veckomålet. Det fixar du.`;
 
-  // Resan
-  const r = resePosition(s.totalKm);
-  const del = r.klar ? 1 : (s.totalKm - r.fran.km) / (r.till.km - r.fran.km);
-  $('resa-fylld').style.width = (del * 100) + '%';
-  $('resa-figur').style.left = (del * 100) + '%';
-  $('resa-fran').textContent = r.fran.namn;
-  $('resa-till').textContent = r.till.namn;
-  $('resa-text').textContent = r.klar
-    ? `Du har gått hela vägen till ${r.till.namn}! ${fmt(s.totalKm)} km. Helt otroligt.`
-    : s.totalKm === 0
-      ? `Resan börjar i ${RUTT[0].namn}. Nästa stopp: ${r.till.namn}.`
-      : `Du har lämnat ${r.fran.namn} och har ${fmt(r.till.km - s.totalKm)} km kvar till ${r.till.namn}.`;
-
   // Siffror
   $('tot-km').textContent = fmt(s.totalKm);
   $('tot-ggr').textContent = s.antal;
@@ -226,7 +155,6 @@ function rita() {
   $('langst').textContent = fmt(s.langst);
 
   ritaDiagram(s);
-  ritaNastaMal(s);
   ritaMedaljer(s);
   ritaHistorik();
 }
@@ -248,80 +176,33 @@ function ritaDiagram(s) {
     </div>`).join('');
 }
 
-const VALOR_NAMN = { brons: 'brons', silver: 'silver', guld: 'guld', diamant: 'diamant' };
-
-function medaljBild(m, stor = false) {
-  return `<span class="medalj-bild ${m.valor}${stor ? ' stor' : ''}"><span>${m.ikon}</span></span>`;
-}
-
-// Spelar upp alla promenader i tur och ordning för att se vilken dag
-// varje medalj togs. Då stämmer datumen även om en promenad tas bort.
-function medaljDatum() {
-  const sorterade = [...data.promenader].sort((a, b) => a.datum.localeCompare(b.datum));
-  const datum = new Map();
-  for (let i = 0; i < sorterade.length; i++) {
-    const s = berakna(sorterade.slice(0, i + 1));
-    for (const m of MEDALJER) {
-      if (!datum.has(m.id) && m.varde(s) >= m.mal) datum.set(m.id, sorterade[i].datum);
-    }
-  }
-  return datum;
-}
-
-// Det första ej tagna målet i varje kategori, närmast först
-function nastaMal(s) {
-  const kandidater = [];
-  for (const kat of Object.keys(KATEGORI_NAMN)) {
-    const m = MEDALJER.find(x => x.kategori === kat && x.varde(s) < x.mal);
-    if (!m) continue;
-    const nu = m.nu ? m.nu(s) : m.varde(s);
-    kandidater.push({ ...m, andel: Math.max(0, nu / m.mal), kvarText: m.kvar(m.mal - nu) });
-  }
-  return kandidater.sort((a, b) => b.andel - a.andel);
-}
-
-function ritaNastaMal(s) {
-  $('nasta-mal').innerHTML = nastaMal(s).slice(0, 3).map(m => `
-    <li>
-      ${medaljBild(m)}
-      <div class="mal-info">
-        <strong>${m.namn}</strong>
-        <div class="mal-bar"><div style="width:${Math.min(100, m.andel * 100)}%"></div></div>
-        <span class="mal-kvar">${m.kvarText} kvar</span>
-      </div>
-    </li>`).join('');
-}
-
 let senasteDatum = new Map();
 
 function ritaMedaljer(s) {
   senasteDatum = medaljDatum();
   $('medalj-antal').textContent = `${senasteDatum.size} av ${MEDALJER.length}`;
-  $('medaljer').innerHTML = Object.entries(KATEGORI_NAMN).map(([kat, rubrik]) => {
-    const lista = MEDALJER.filter(m => m.kategori === kat);
-    const tagna = lista.filter(m => senasteDatum.has(m.id)).length;
-    return `<h3>${rubrik} <span>${tagna}/${lista.length}</span></h3>
-      <div class="medalj-rad">${lista.filter((m, i) => i < tagna + 2).map(m => `
-        <button type="button" class="medalj${senasteDatum.has(m.id) ? '' : ' last'}" data-medalj="${m.id}">
-          ${medaljBild(m)}<span class="namn">${m.namn}</span>
-        </button>`).join('')}
-      </div>${lista.length > tagna + 2 ? `<p class="fler">…och ${lista.length - tagna - 2} till att låsa upp</p>` : ''}`;
-  }).join('');
+  // Visa tagna medaljer och de tre närmaste, resten är en överraskning
+  const visas = MEDALJER.filter((m, i) => i < senasteDatum.size + 3);
+  const gomda = MEDALJER.length - visas.length;
+  $('medaljer').innerHTML = visas.map(m => `
+    <button type="button" class="medalj${senasteDatum.has(m.km) ? '' : ' last'}" data-km="${m.km}">
+      ${medaljBild(m)}<span class="namn">${m.namn}</span>
+    </button>`).join('');
+  $('medaljer-fler').textContent = gomda ? `…och ${gomda} till längre fram.` : '';
 }
 
 $('medaljer').addEventListener('click', e => {
-  const knapp = e.target.closest('[data-medalj]');
+  const knapp = e.target.closest('[data-km]');
   if (!knapp) return;
-  const m = MEDALJER.find(x => x.id === knapp.dataset.medalj);
-  const s = berakna();
-  const tagen = senasteDatum.get(m.id);
+  const m = MEDALJER.find(x => String(x.km) === knapp.dataset.km);
+  const tagen = senasteDatum.get(m.km);
+  const kvar = m.km - berakna().totalKm;
   $('firande-emoji').innerHTML = `<span class="${tagen ? '' : 'last'}">${medaljBild(m, true)}</span>`;
   $('firande-rubrik').textContent = m.namn;
-  $('firande-stang').textContent = 'Stäng';
-  const nu = m.nu ? m.nu(s) : m.varde(s);
   $('firande-text').textContent = tagen
-    ? `${m.text}.\n\nDu tog den här medaljen i ${VALOR_NAMN[m.valor]} ${new Date(tagen).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}.`
-    : `${m.text}.\n\n${m.kvar(m.mal - nu)} kvar. Det här är en medalj i ${VALOR_NAMN[m.valor]}.`;
+    ? `Du tog den när du hade gått ${fmt(m.km)} km, ${new Date(tagen).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+    : `Den får du när du har gått ${fmt(m.km)} km totalt.\n${fmt(kvar)} km kvar.`;
+  $('firande-stang').textContent = 'Stäng';
   $('firande').hidden = false;
 });
 
@@ -366,7 +247,6 @@ document.querySelectorAll('[data-steg]').forEach(knapp => {
 
 $('spara').addEventListener('click', () => {
   const fore = berakna();
-  const foreDatum = medaljDatum();
 
   data.promenader.push({
     id: Date.now().toString(36),
@@ -377,13 +257,12 @@ $('spara').addEventListener('click', () => {
   sparaData();
 
   const efter = berakna();
-  const nyaMedaljer = MEDALJER.filter(m => m.varde(efter) >= m.mal && !foreDatum.has(m.id));
-
-  fira(fore, efter, nyaMedaljer);
+  const nya = tagna(efter.totalKm).filter(m => fore.totalKm < m.km);
+  fira(fore, efter, nya);
   rita();
 });
 
-function fira(fore, efter, nyaMedaljer) {
+function fira(fore, efter, nya) {
   const rader = [`${fmt(varden.km)} km på ${varden.min} minuter.`];
   let emoji = '🎉';
 
@@ -395,27 +274,21 @@ function fira(fore, efter, nyaMedaljer) {
     rader.push('Veckomålet är klart!');
     emoji = '🎯';
   }
-  if (efter.nuvarandeSvit >= 2) rader.push(`${efter.nuvarandeSvit} dagar i rad.`);
   rader.push(`Totalt ${fmt(efter.totalKm)} km nu.`);
+  const nasta = nastaMedalj(efter.totalKm);
+  if (nasta) rader.push(`\n${fmt(nasta.km - efter.totalKm)} km kvar till nästa medalj.`);
 
-  const nasta = nastaMal(efter)[0];
-  if (nasta) rader.push(`\nNästa medalj: ${nasta.namn}. ${nasta.kvarText} kvar.`);
-
-  // Nya medaljer tar över hela rutan, de är det roligaste som kan hända
-  const visas = nyaMedaljer.slice(0, 3);
-  $('firande-emoji').innerHTML = visas.length
-    ? `<div class="firande-medaljer">${visas.map(m => medaljBild(m, true)).join('')}</div>`
+  // En ny medalj tar över hela rutan, det är det roligaste som kan hända
+  $('firande-emoji').innerHTML = nya.length
+    ? `<div class="firande-medaljer">${nya.map(m => medaljBild(m, true)).join('')}</div>`
     : emoji;
-  $('firande-rubrik').textContent = nyaMedaljer.length === 1
-    ? `Ny medalj, ${data.namn}!`
-    : nyaMedaljer.length > 1
-      ? `${nyaMedaljer.length} nya medaljer, ${data.namn}!`
-      : `Bra jobbat, ${data.namn}!`;
-  const medaljRader = nyaMedaljer.map(m => `${m.namn} (${VALOR_NAMN[m.valor]})`);
-  $('firande-text').textContent = [...medaljRader, ...(medaljRader.length ? [''] : []), ...rader].join('\n');
+  $('firande-rubrik').textContent = nya.length
+    ? `${nya.length === 1 ? 'Ny medalj' : nya.length + ' nya medaljer'}, ${data.namn}!`
+    : `Bra jobbat, ${data.namn}!`;
+  $('firande-text').textContent = [...nya.map(m => m.namn), ...(nya.length ? [''] : []), ...rader].join('\n');
   $('firande-stang').textContent = 'Tack!';
   $('firande').hidden = false;
-  konfetti(nyaMedaljer.length ? 260 : 140);
+  konfetti(nya.length ? 260 : 140);
 }
 
 $('firande-stang').addEventListener('click', () => { $('firande').hidden = true; });

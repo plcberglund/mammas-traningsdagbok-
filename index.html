@@ -40,9 +40,16 @@
       <button id="spara" class="stor-knapp">Jag har gått! 🎉</button>
     </section>
 
-    <section class="kort" id="mal-kort">
-      <h2>Nästa mål</h2>
-      <ul class="nasta-mal" id="nasta-mal"></ul>
+    <section class="kort" id="nasta-kort">
+      <h2>Nästa medalj</h2>
+      <div class="nasta">
+        <span id="nasta-bild"></span>
+        <div class="nasta-info">
+          <strong id="nasta-namn"></strong>
+          <div class="mal-bar"><div id="nasta-fylld"></div></div>
+          <span class="mal-kvar" id="nasta-text"></span>
+        </div>
+      </div>
     </section>
 
     <section class="kort" id="vecka">
@@ -57,13 +64,6 @@
         </div>
         <p id="vecka-text" class="vecka-text"></p>
       </div>
-    </section>
-
-    <section class="kort" id="resa">
-      <h2>Din resa genom Sverige</h2>
-      <p id="resa-text" class="resa-text"></p>
-      <div class="resa-bar"><div class="resa-fylld" id="resa-fylld"></div><span class="resa-figur" id="resa-figur">🚶‍♀️</span></div>
-      <div class="resa-ander"><span id="resa-fran"></span><span id="resa-till"></span></div>
     </section>
 
     <section class="kort" id="siffror">
@@ -83,8 +83,9 @@
 
     <section class="kort" id="medaljer-kort">
       <h2>Medaljer <span class="medalj-antal" id="medalj-antal"></span></h2>
-      <p class="hjalp">Tryck på en medalj för att se vad som krävs.</p>
+      <p class="hjalp">En ny medalj för varje sträcka du når. Tryck på en för att se mer.</p>
       <div class="medaljer" id="medaljer"></div>
+      <p class="fler" id="medaljer-fler"></p>
     </section>
 
     <section class="kort" id="historik-kort">
