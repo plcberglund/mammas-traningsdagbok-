@@ -2,6 +2,10 @@
 
 const LAGRING = 'mammas-promenader-v1';
 
+const $ = id => document.getElementById(id);
+const fmt = (n, dec = 1) => n.toLocaleString('sv-SE', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+const fmtTal = n => n.toLocaleString('sv-SE', { maximumFractionDigits: 1 });
+
 // Resan räknas i km från start. Byt gärna ut mot en rutt som passar mamma.
 const RUTT = [
   { namn: 'Stockholm', km: 0 },
@@ -18,20 +22,63 @@ const RUTT = [
   { namn: 'Kiruna', km: 1250 },
 ];
 
-const MEDALJER = [
-  { ikon: '👟', namn: 'Första promenaden', klar: s => s.antal >= 1 },
-  { ikon: '🥉', namn: 'Första milen', klar: s => s.totalKm >= 10 },
-  { ikon: '🏃‍♀️', namn: 'Halvmaraton', klar: s => s.totalKm >= 21.1 },
-  { ikon: '🏅', namn: 'Maraton', klar: s => s.totalKm >= 42.2 },
-  { ikon: '💯', namn: '100 km', klar: s => s.totalKm >= 100 },
-  { ikon: '🎯', namn: 'Veckomålet klart', klar: s => s.basstaVecka >= s.mal },
-  { ikon: '🔥', namn: '3 dagar i rad', klar: s => s.langstaSvit >= 3 },
-  { ikon: '⭐', namn: '7 dagar i rad', klar: s => s.langstaSvit >= 7 },
-  { ikon: '🔟', namn: '10 promenader', klar: s => s.antal >= 10 },
-  { ikon: '🏆', namn: '50 promenader', klar: s => s.antal >= 50 },
-  { ikon: '⏱️', namn: '10 timmar', klar: s => s.totalMin >= 600 },
-  { ikon: '🌟', namn: '5 km på en gång', klar: s => s.langst >= 5 },
+// Varje kategori är en trappa av mål. De första stegen är lätta så att
+// medaljerna kommer tätt i början, sen glesnar de ut.
+const KATEGORIER = [
+  { id: 'km', rubrik: 'Sträcka', ikon: '👣', varde: s => s.totalKm,
+    steg: [1, 5, 10, 21.1, 42.2, 70, 100, 200, 300, 500, 1000],
+    namn: m => ({ 10: 'Första milen', 21.1: 'Halvmaraton', 42.2: 'Maraton' }[m] || fmtTal(m) + ' km'),
+    text: m => `Gå ${fmtTal(m)} km totalt`, kvar: k => fmt(k) + ' km' },
+  { id: 'antal', rubrik: 'Promenader', ikon: '👟', varde: s => s.antal,
+    steg: [1, 5, 10, 25, 50, 75, 100, 150, 200, 365],
+    namn: m => m === 1 ? 'Första promenaden' : m + ' promenader',
+    text: m => m === 1 ? 'Gå din första promenad' : `Gå ${m} promenader`,
+    kvar: k => Math.ceil(k) + (Math.ceil(k) === 1 ? ' promenad' : ' promenader') },
+  { id: 'tid', rubrik: 'Tid', ikon: '⏱️', varde: s => s.totalMin / 60,
+    steg: [1, 5, 10, 25, 50, 100, 200],
+    namn: m => m === 1 ? 'Första timmen' : m + ' timmar',
+    text: m => `Gå ${m} ${m === 1 ? 'timme' : 'timmar'} totalt`, kvar: k => Math.ceil(k * 60) + ' min' },
+  { id: 'langst', rubrik: 'Långpass', ikon: '🌟', varde: s => s.langst,
+    steg: [2, 3, 4, 5, 6, 8, 10],
+    namn: m => m + ' km på en gång', text: m => `Gå ${m} km i ett och samma pass`,
+    kvar: k => fmt(k) + ' km längre' },
+  { id: 'svit', rubrik: 'Dagar i rad', ikon: '🔥', varde: s => s.langstaSvit,
+    steg: [2, 3, 5, 7, 14, 21, 30],
+    namn: m => m + ' dagar i rad', text: m => `Gå ${m} dagar i rad`,
+    kvar: k => Math.ceil(k) + (Math.ceil(k) === 1 ? ' dag till' : ' dagar till'), nu: s => s.nuvarandeSvit },
+  { id: 'veckor', rubrik: 'Veckomål', ikon: '🎯', varde: s => s.veckorMedMal,
+    steg: [1, 4, 8, 12, 26, 52],
+    namn: m => m === 1 ? 'Första veckomålet' : m + ' veckomål',
+    text: m => m === 1 ? 'Klara veckomålet en vecka' : `Klara veckomålet ${m} veckor`,
+    kvar: k => Math.ceil(k) + (Math.ceil(k) === 1 ? ' vecka till' : ' veckor till') },
+  { id: 'veckosvit', rubrik: 'Veckor i rad', ikon: '📅', varde: s => s.langstaVeckoSvit,
+    steg: [2, 4, 8, 13, 26],
+    namn: m => m + ' veckor i rad', text: m => `Klara veckomålet ${m} veckor i rad`,
+    kvar: k => Math.ceil(k) + (Math.ceil(k) === 1 ? ' vecka till' : ' veckor till'), nu: s => s.nuvarandeVeckoSvit },
 ];
+
+const VALORER = ['brons', 'silver', 'guld', 'diamant'];
+
+function valorFor(i, antal) {
+  if (i === antal - 1 && antal >= 5) return 'diamant';
+  return VALORER[Math.min(2, Math.floor((i / antal) * 3))];
+}
+
+const MEDALJER = [
+  ...KATEGORIER.flatMap(k => k.steg.map((m, i) => ({
+    id: k.id + '-' + m, kategori: k.id, ikon: k.ikon, mal: m, valor: valorFor(i, k.steg.length),
+    namn: k.namn(m), text: k.text(m), varde: k.varde, kvar: k.kvar,
+  }))),
+  // En medalj för varje stad längs resan
+  ...RUTT.slice(1).map((stad, i, alla) => ({
+    id: 'stad-' + stad.namn, kategori: 'resa', ikon: '📍', mal: stad.km,
+    valor: i === alla.length - 1 ? 'diamant' : valorFor(i, alla.length - 1),
+    namn: 'Framme i ' + stad.namn, text: `Gå hela vägen till ${stad.namn} (${stad.km} km)`,
+    varde: s => s.totalKm, kvar: k => fmt(k) + ' km',
+  })),
+];
+
+const KATEGORI_NAMN = Object.fromEntries([...KATEGORIER.map(k => [k.id, k.rubrik]), ['resa', 'Resan']]);
 
 const PEPP = [
   'Varje steg räknas.',
@@ -81,8 +128,7 @@ function veckoNummer(d) {
 
 // ---------- Statistik ----------
 
-function berakna() {
-  const p = data.promenader;
+function berakna(p = data.promenader) {
   const totalKm = p.reduce((s, x) => s + x.km, 0);
   const totalMin = p.reduce((s, x) => s + x.min, 0);
   const langst = p.reduce((m, x) => Math.max(m, x.km), 0);
@@ -95,11 +141,25 @@ function berakna() {
   const dennaVecka = perVecka.get(dagNyckel(veckoStart(new Date()))) || 0;
   const basstaVecka = Math.max(0, ...perVecka.values());
 
+  // Veckor där veckomålet nåddes, och längsta följden av sådana veckor
+  const malVeckor = [...perVecka].filter(([, km]) => km >= data.veckomal).map(([k]) => k).sort();
+  let langstaVeckoSvit = 0, veckoSvit = 0, forraVecka = null;
+  for (const k of malVeckor) {
+    const v = new Date(k);
+    veckoSvit = forraVecka && Math.round((v - forraVecka) / 86400000) === 7 ? veckoSvit + 1 : 1;
+    langstaVeckoSvit = Math.max(langstaVeckoSvit, veckoSvit);
+    forraVecka = v;
+  }
+  // Pågående veckosvit: räknas om förra eller denna vecka nådde målet
+  const sistaMal = malVeckor.length ? new Date(malVeckor[malVeckor.length - 1]) : null;
+  const dennaMandag = new Date(dagNyckel(veckoStart(new Date())));
+  const nuvarandeVeckoSvit = sistaMal && Math.round((dennaMandag - sistaMal) / 86400000) <= 7 ? veckoSvit : 0;
+
   const dagar = [...new Set(p.map(x => dagNyckel(new Date(x.datum))))].sort();
   let langstaSvit = 0, svit = 0, forra = null;
   for (const d of dagar) {
     const idag = new Date(d);
-    svit = forra && (idag - forra) / 86400000 === 1 ? svit + 1 : 1;
+    svit = forra && Math.round((idag - forra) / 86400000) === 1 ? svit + 1 : 1;
     langstaSvit = Math.max(langstaSvit, svit);
     forra = idag;
   }
@@ -112,7 +172,7 @@ function berakna() {
   }
 
   return { antal: p.length, totalKm, totalMin, langst, dennaVecka, basstaVecka, perVecka,
-           langstaSvit, nuvarandeSvit, mal: data.veckomal };
+           langstaSvit, nuvarandeSvit, veckorMedMal: malVeckor.length, langstaVeckoSvit, nuvarandeVeckoSvit };
 }
 
 function resePosition(km) {
@@ -123,9 +183,6 @@ function resePosition(km) {
 }
 
 // ---------- Visning ----------
-
-const $ = id => document.getElementById(id);
-const fmt = (n, dec = 1) => n.toLocaleString('sv-SE', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 
 function rita() {
   const s = berakna();
@@ -169,6 +226,7 @@ function rita() {
   $('langst').textContent = fmt(s.langst);
 
   ritaDiagram(s);
+  ritaNastaMal(s);
   ritaMedaljer(s);
   ritaHistorik();
 }
@@ -190,12 +248,82 @@ function ritaDiagram(s) {
     </div>`).join('');
 }
 
-function ritaMedaljer(s) {
-  $('medaljer').innerHTML = MEDALJER.map(m => `
-    <div class="medalj${m.klar(s) ? '' : ' last'}">
-      <span class="ikon">${m.ikon}</span><span class="namn">${m.namn}</span>
-    </div>`).join('');
+const VALOR_NAMN = { brons: 'brons', silver: 'silver', guld: 'guld', diamant: 'diamant' };
+
+function medaljBild(m, stor = false) {
+  return `<span class="medalj-bild ${m.valor}${stor ? ' stor' : ''}"><span>${m.ikon}</span></span>`;
 }
+
+// Spelar upp alla promenader i tur och ordning för att se vilken dag
+// varje medalj togs. Då stämmer datumen även om en promenad tas bort.
+function medaljDatum() {
+  const sorterade = [...data.promenader].sort((a, b) => a.datum.localeCompare(b.datum));
+  const datum = new Map();
+  for (let i = 0; i < sorterade.length; i++) {
+    const s = berakna(sorterade.slice(0, i + 1));
+    for (const m of MEDALJER) {
+      if (!datum.has(m.id) && m.varde(s) >= m.mal) datum.set(m.id, sorterade[i].datum);
+    }
+  }
+  return datum;
+}
+
+// Det första ej tagna målet i varje kategori, närmast först
+function nastaMal(s) {
+  const kandidater = [];
+  for (const kat of Object.keys(KATEGORI_NAMN)) {
+    const m = MEDALJER.find(x => x.kategori === kat && x.varde(s) < x.mal);
+    if (!m) continue;
+    const nu = m.nu ? m.nu(s) : m.varde(s);
+    kandidater.push({ ...m, andel: Math.max(0, nu / m.mal), kvarText: m.kvar(m.mal - nu) });
+  }
+  return kandidater.sort((a, b) => b.andel - a.andel);
+}
+
+function ritaNastaMal(s) {
+  $('nasta-mal').innerHTML = nastaMal(s).slice(0, 3).map(m => `
+    <li>
+      ${medaljBild(m)}
+      <div class="mal-info">
+        <strong>${m.namn}</strong>
+        <div class="mal-bar"><div style="width:${Math.min(100, m.andel * 100)}%"></div></div>
+        <span class="mal-kvar">${m.kvarText} kvar</span>
+      </div>
+    </li>`).join('');
+}
+
+let senasteDatum = new Map();
+
+function ritaMedaljer(s) {
+  senasteDatum = medaljDatum();
+  $('medalj-antal').textContent = `${senasteDatum.size} av ${MEDALJER.length}`;
+  $('medaljer').innerHTML = Object.entries(KATEGORI_NAMN).map(([kat, rubrik]) => {
+    const lista = MEDALJER.filter(m => m.kategori === kat);
+    const tagna = lista.filter(m => senasteDatum.has(m.id)).length;
+    return `<h3>${rubrik} <span>${tagna}/${lista.length}</span></h3>
+      <div class="medalj-rad">${lista.filter((m, i) => i < tagna + 2).map(m => `
+        <button type="button" class="medalj${senasteDatum.has(m.id) ? '' : ' last'}" data-medalj="${m.id}">
+          ${medaljBild(m)}<span class="namn">${m.namn}</span>
+        </button>`).join('')}
+      </div>${lista.length > tagna + 2 ? `<p class="fler">…och ${lista.length - tagna - 2} till att låsa upp</p>` : ''}`;
+  }).join('');
+}
+
+$('medaljer').addEventListener('click', e => {
+  const knapp = e.target.closest('[data-medalj]');
+  if (!knapp) return;
+  const m = MEDALJER.find(x => x.id === knapp.dataset.medalj);
+  const s = berakna();
+  const tagen = senasteDatum.get(m.id);
+  $('firande-emoji').innerHTML = `<span class="${tagen ? '' : 'last'}">${medaljBild(m, true)}</span>`;
+  $('firande-rubrik').textContent = m.namn;
+  $('firande-stang').textContent = 'Stäng';
+  const nu = m.nu ? m.nu(s) : m.varde(s);
+  $('firande-text').textContent = tagen
+    ? `${m.text}.\n\nDu tog den här medaljen i ${VALOR_NAMN[m.valor]} ${new Date(tagen).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+    : `${m.text}.\n\n${m.kvar(m.mal - nu)} kvar. Det här är en medalj i ${VALOR_NAMN[m.valor]}.`;
+  $('firande').hidden = false;
+});
 
 function ritaHistorik() {
   const lista = [...data.promenader].sort((a, b) => b.datum.localeCompare(a.datum)).slice(0, 10);
@@ -238,8 +366,7 @@ document.querySelectorAll('[data-steg]').forEach(knapp => {
 
 $('spara').addEventListener('click', () => {
   const fore = berakna();
-  const foreMedaljer = MEDALJER.filter(m => m.klar(fore)).map(m => m.namn);
-  const foreResa = resePosition(fore.totalKm);
+  const foreDatum = medaljDatum();
 
   data.promenader.push({
     id: Date.now().toString(36),
@@ -250,22 +377,16 @@ $('spara').addEventListener('click', () => {
   sparaData();
 
   const efter = berakna();
-  const nyaMedaljer = MEDALJER.filter(m => m.klar(efter) && !foreMedaljer.includes(m.namn));
-  const efterResa = resePosition(efter.totalKm);
+  const nyaMedaljer = MEDALJER.filter(m => m.varde(efter) >= m.mal && !foreDatum.has(m.id));
 
-  fira(fore, efter, nyaMedaljer, foreResa, efterResa);
+  fira(fore, efter, nyaMedaljer);
   rita();
 });
 
-function fira(fore, efter, nyaMedaljer, foreResa, efterResa) {
+function fira(fore, efter, nyaMedaljer) {
   const rader = [`${fmt(varden.km)} km på ${varden.min} minuter.`];
   let emoji = '🎉';
-  let rubrik = 'Bra jobbat, ' + data.namn + '!';
 
-  if (efterResa.fran.km > foreResa.fran.km) {
-    rader.push(`Du har nått ${efterResa.fran.namn}! 📍`);
-    emoji = '🗺️';
-  }
   if (fore.antal > 0 && varden.km > fore.langst) {
     rader.push('Nytt rekord! Din längsta promenad hittills.');
     emoji = '🏆';
@@ -275,14 +396,26 @@ function fira(fore, efter, nyaMedaljer, foreResa, efterResa) {
     emoji = '🎯';
   }
   if (efter.nuvarandeSvit >= 2) rader.push(`${efter.nuvarandeSvit} dagar i rad.`);
-  for (const m of nyaMedaljer) rader.push(`Ny medalj: ${m.ikon} ${m.namn}`);
   rader.push(`Totalt ${fmt(efter.totalKm)} km nu.`);
 
-  $('firande-emoji').textContent = emoji;
-  $('firande-rubrik').textContent = rubrik;
-  $('firande-text').textContent = rader.join('\n');
+  const nasta = nastaMal(efter)[0];
+  if (nasta) rader.push(`\nNästa medalj: ${nasta.namn}. ${nasta.kvarText} kvar.`);
+
+  // Nya medaljer tar över hela rutan, de är det roligaste som kan hända
+  const visas = nyaMedaljer.slice(0, 3);
+  $('firande-emoji').innerHTML = visas.length
+    ? `<div class="firande-medaljer">${visas.map(m => medaljBild(m, true)).join('')}</div>`
+    : emoji;
+  $('firande-rubrik').textContent = nyaMedaljer.length === 1
+    ? `Ny medalj, ${data.namn}!`
+    : nyaMedaljer.length > 1
+      ? `${nyaMedaljer.length} nya medaljer, ${data.namn}!`
+      : `Bra jobbat, ${data.namn}!`;
+  const medaljRader = nyaMedaljer.map(m => `${m.namn} (${VALOR_NAMN[m.valor]})`);
+  $('firande-text').textContent = [...medaljRader, ...(medaljRader.length ? [''] : []), ...rader].join('\n');
+  $('firande-stang').textContent = 'Tack!';
   $('firande').hidden = false;
-  konfetti();
+  konfetti(nyaMedaljer.length ? 260 : 140);
 }
 
 $('firande-stang').addEventListener('click', () => { $('firande').hidden = true; });
@@ -332,14 +465,14 @@ $('importera').addEventListener('change', async e => {
 
 // ---------- Konfetti ----------
 
-function konfetti() {
+function konfetti(antal = 140) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const c = $('konfetti');
   const ctx = c.getContext('2d');
   c.width = innerWidth;
   c.height = innerHeight;
   const farger = ['#2f6f4f', '#e0a526', '#d9546a', '#4a90d9', '#8bc34a'];
-  const bitar = Array.from({ length: 140 }, () => ({
+  const bitar = Array.from({ length: antal }, () => ({
     x: Math.random() * c.width, y: -20 - Math.random() * c.height * 0.5,
     vx: (Math.random() - 0.5) * 3, vy: 2 + Math.random() * 3,
     r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.2,
