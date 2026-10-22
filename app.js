@@ -322,14 +322,37 @@ function fira(fore, efter, nya) {
     ? `${nya.length === 1 ? 'Ny medalj' : nya.length + ' nya medaljer'}, ${data.namn}!`
     : `Bra jobbat, ${data.namn}!`;
   const presenter = nya.filter(m => m.beloning)
-    .map(m => `🎁 Du har vunnit ${m.beloning}! Ring ${GIVARE} och säg till.`);
+    .map(m => `🎁 Du har vunnit ${m.beloning}! Skicka ett sms till ${GIVARE} och säg till.`);
   $('firande-text').textContent = [...nya.map(m => m.namn), ...presenter, ...(nya.length ? [''] : []), ...rader].join('\n');
   $('firande-stang').textContent = 'Tack!';
+  visaSms(efter, nya);
   $('firande').hidden = false;
   konfetti(nya.length ? 260 : 140);
 }
 
-$('firande-stang').addEventListener('click', () => { $('firande').hidden = true; });
+// Färdigt sms till GIVARE efter varje pass. Numret skrivs in under
+// Inställningar på telefonen och ligger aldrig i koden.
+function visaSms(efter, nya) {
+  const rader = [`Hej ${GIVARE}! Jag har gått ${fmt(varden.km)} km idag. Totalt ${fmt(efter.totalKm)} km nu.`];
+  for (const m of nya) rader.push(`Jag tog medaljen "${m.namn}"!`);
+  for (const m of nya.filter(x => x.beloning)) rader.push(`🎁 Och jag har vunnit ${m.beloning}!`);
+  const present = MEDALJER.find(m => m.beloning && efter.totalKm < m.km);
+  if (present) rader.push(`${fmt(present.km - efter.totalKm)} km kvar till nästa belöning.`);
+  rader.push(`/${data.namn}`);
+  const nummer = (data.telefon || '').replace(/[^\d+]/g, '');
+  $('firande-sms').href = `sms:${nummer}?body=${encodeURIComponent(rader.join('\n'))}`;
+  $('firande-sms').textContent = `💬 Berätta för ${GIVARE}`;
+  $('firande-sms').hidden = false;
+}
+
+$('firande-stang').addEventListener('click', () => {
+  $('firande').hidden = true;
+  $('firande-sms').hidden = true;
+});
+$('firande-sms').addEventListener('click', () => {
+  $('firande').hidden = true;
+  $('firande-sms').hidden = true;
+});
 
 $('historik').addEventListener('click', e => {
   const knapp = e.target.closest('.ta-bort');
@@ -344,6 +367,8 @@ $('historik').addEventListener('click', e => {
 
 $('namn').value = data.namn;
 $('mal').value = data.veckomal;
+$('telefon').value = data.telefon || '';
+$('telefon').addEventListener('change', e => { data.telefon = e.target.value.trim(); sparaData(); });
 $('namn').addEventListener('change', e => { data.namn = e.target.value.trim() || 'Hjördis'; sparaData(); rita(); });
 $('mal').addEventListener('change', e => { data.veckomal = Math.max(1, Number(e.target.value) || 10); sparaData(); rita(); });
 
@@ -367,6 +392,7 @@ $('importera').addEventListener('change', async e => {
     sparaData();
     $('namn').value = data.namn;
     $('mal').value = data.veckomal;
+    $('telefon').value = data.telefon || '';
     rita();
   } catch {
     alert('Filen gick inte att läsa.');

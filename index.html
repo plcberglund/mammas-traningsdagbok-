@@ -107,6 +107,7 @@
       <summary>Inställningar</summary>
       <label>Ditt namn <input id="namn" type="text" autocomplete="given-name"></label>
       <label>Veckomål i km <input id="mal" type="number" min="1" step="1" inputmode="numeric"></label>
+      <label>Linus mobilnummer <input id="telefon" type="tel" autocomplete="off" placeholder="070-123 45 67"></label>
       <div class="knapprad">
         <button type="button" id="exportera">Spara säkerhetskopia</button>
         <label class="knapp-fil">Läs in säkerhetskopia <input type="file" id="importera" accept="application/json"></label>
@@ -120,6 +121,7 @@
       <div class="firande-emoji" id="firande-emoji">🎉</div>
       <h2 id="firande-rubrik">Bra jobbat!</h2>
       <p id="firande-text"></p>
+      <a class="stor-knapp sms-knapp" id="firande-sms" hidden>💬 Berätta för Linus</a>
       <button class="stor-knapp" id="firande-stang">Tack!</button>
     </div>
   </div>

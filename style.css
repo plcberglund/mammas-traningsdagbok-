@@ -158,3 +158,13 @@ button { font: inherit; cursor: pointer; }
 .installera[hidden] { display: none; }
 .steg-lista { text-align: left; font-size: 1.15rem; padding-left: 1.4em; margin: 0 0 20px; }
 .steg-lista li { margin-bottom: 12px; }
+
+.sms-knapp {
+  display: block; box-sizing: border-box; margin-bottom: 12px; text-decoration: none; text-align: center;
+  background: #fff; color: var(--gron); border: 2px solid var(--gron);
+}
+.sms-knapp[hidden] { display: none; }
+.installningar input[type=tel] {
+  display: block; width: 100%; margin-top: 4px; padding: 12px; font: inherit;
+  border: 1px solid var(--kant); border-radius: 10px;
+}
