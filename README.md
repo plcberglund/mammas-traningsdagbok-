@@ -1,6 +1,6 @@
 # Mammas promenader
 
-En liten webbapp för promenader på rullbandet framför tv:n. Efter varje pass läser mamma av rullbandet, trycker in km och minuter med stora plus/minus-knappar och trycker på "Jag har gått!". Då kommer konfetti och en pepp-ruta.
+En liten webbapp för promenader på rullbandet framför tv:n. Efter varje pass läser mamma av rullbandet, trycker in km och minuter med stora plus/minus-knappar och trycker på "Spara promenaden". Då kommer konfetti och en pepp-ruta.
 
 Appen visar nästa medalj, veckomålet som en ring, totalsiffror, staplar vecka för vecka, medaljerna och de senaste promenaderna.
 
