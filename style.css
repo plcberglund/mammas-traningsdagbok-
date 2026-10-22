@@ -24,6 +24,7 @@ body {
 header { padding: 28px 16px 8px; text-align: center; }
 h1 { margin: 0; font-size: 2rem; }
 h2 { margin: 0 0 12px; font-size: 1.3rem; }
+.stor-pepp { margin: 4px 0 0; font-size: 1.6rem; font-weight: 700; color: var(--gron); }
 .pepp { margin: 6px 0 0; color: var(--dampad); font-size: 1.1rem; }
 .hjalp { color: var(--dampad); font-size: 0.95rem; margin: 0 0 16px; }
 

@@ -54,12 +54,12 @@ const MILSTENAR = Array.from({ length: 30 }, (_, i) => ({
 const MEDALJER = [...STADER, ...MILSTENAR].sort((a, b) => a.km - b.km).map(m => ({ ...m, valor: m.km < 50 ? 'brons' : m.km < 300 ? 'silver' : m.km < 1000 ? 'guld' : 'diamant' }));
 
 const PEPP = [
-  'Varje steg räknas.',
-  'Dags för en avsnittspromenad?',
-  'Benen tackar dig i morgon.',
+  'Varje steg tar dig närmare nästa medalj.',
+  'Sätt på ett avsnitt och kliv upp på bandet!',
+  'Du är starkare än du tror.',
   'Ett avsnitt till, ett varv till.',
-  'Du är på god väg.',
-  'Lite i taget blir mycket till slut.',
+  'Benen kommer att tacka dig.',
+  'Lite i taget blir väldigt mycket till slut.',
 ];
 
 // ---------- Data ----------
@@ -143,7 +143,12 @@ function rita() {
   const s = berakna();
 
   $('halsning').textContent = 'Hej ' + data.namn + '!';
-  $('dagens-pepp').textContent = PEPP[new Date().getDate() % PEPP.length];
+  const idag = dagNyckel(new Date());
+  const gattIdag = data.promenader.some(x => dagNyckel(new Date(x.datum)) === idag);
+  $('stor-pepp').textContent = gattIdag ? 'Snyggt jobbat idag! 🌟' : 'Nu kör vi! 💪';
+  $('dagens-pepp').textContent = s.antal === 0
+    ? 'Första medaljen är bara en kilometer bort.'
+    : PEPP[new Date().getDate() % PEPP.length];
 
   // Nästa medalj
   const nasta = nastaMedalj(s.totalKm);
