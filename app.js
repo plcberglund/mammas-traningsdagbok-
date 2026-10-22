@@ -367,6 +367,14 @@ $('historik').addEventListener('click', e => {
 
 $('namn').value = data.namn;
 $('mal').value = data.veckomal;
+// Numret kan följa med i länken, t.ex. ...#tel=0701234567. Det sparas
+// i telefonen och tas sen bort ur adressfältet, så det aldrig ligger i koden.
+const telIlank = new URLSearchParams(location.hash.slice(1)).get('tel');
+if (telIlank) {
+  data.telefon = telIlank;
+  sparaData();
+  history.replaceState(null, '', location.pathname + location.search);
+}
 $('telefon').value = data.telefon || '';
 $('telefon').addEventListener('change', e => { data.telefon = e.target.value.trim(); sparaData(); });
 $('namn').addEventListener('change', e => { data.namn = e.target.value.trim() || 'Hjördis'; sparaData(); rita(); });
