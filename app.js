@@ -11,9 +11,18 @@ const GIVARE = 'Linus';
 // första veckan ger flera, sen längre mellan. Städerna är en låtsasresa
 // från Umeå söderut längs E4, via Stockholm och Göteborg ner till Malmö.
 // Sträckorna är ungefärliga bilvägsavstånd från Umeå.
-// Medaljer med "beloning" ger en riktig present från GIVARE. De ska
-// vara svåra att få: runt fem månader, ett år och tre år i lugnt tempo.
-const MEDALJER = [
+// Varje tionde mil (100 km) ger dessutom en belöning från GIVARE.
+// Belöningarna turas om i den ordning de står i listan.
+const BELONINGAR = [
+  'en fika på stan',
+  'en lunch ute',
+  'en biokväll',
+  'en blombukett',
+  'en utflykt, du väljer vart',
+  'en middag på restaurang',
+];
+
+const STADER = [
   { km: 1, namn: 'Första kilometern', ikon: '👟' },
   { km: 5, namn: 'Fem kilometer', ikon: '🌱' },
   { km: 10, namn: 'En hel mil', ikon: '🥾' },
@@ -21,20 +30,28 @@ const MEDALJER = [
   { km: 30, namn: 'Framme i Hörnefors', ikon: '🌲' },
   { km: 42.2, namn: 'Maraton', ikon: '🏅' },
   { km: 55, namn: 'Framme i Nordmaling', ikon: '🦌' },
-  { km: 100, namn: 'Hundra kilometer', ikon: '💯' },
   { km: 113, namn: 'Framme i Örnsköldsvik', ikon: '⛰️' },
-  { km: 225, namn: 'Framme i Härnösand', ikon: '⛪', beloning: 'en lunch ute' },
+  { km: 225, namn: 'Framme i Härnösand', ikon: '⛪' },
   { km: 275, namn: 'Framme i Sundsvall', ikon: '🌉' },
   { km: 360, namn: 'Framme i Hudiksvall', ikon: '🌊' },
   { km: 485, namn: 'Framme i Gävle', ikon: '🐐' },
   { km: 585, namn: 'Framme i Uppsala', ikon: '🏰' },
-  { km: 655, namn: 'Framme i Stockholm', ikon: '👑', beloning: 'en utflykt, du väljer vart' },
+  { km: 655, namn: 'Framme i Stockholm', ikon: '👑' },
   { km: 975, namn: 'Framme i Jönköping', ikon: '🍬' },
-  { km: 1000, namn: 'Tusen kilometer', ikon: '🏆' },
   { km: 1125, namn: 'Framme i Göteborg', ikon: '⚓' },
   { km: 1270, namn: 'Framme i Halmstad', ikon: '🏖️' },
-  { km: 1410, namn: 'Framme i Malmö', ikon: '🏙️', beloning: 'en stor överraskning' },
-].map(m => ({ ...m, valor: m.km < 50 ? 'brons' : m.km < 300 ? 'silver' : m.km < 1000 ? 'guld' : 'diamant' }));
+  { km: 1410, namn: 'Framme i Malmö', ikon: '🏙️' },
+];
+
+// 10 mil, 20 mil och så vidare, så att belöningarna fortsätter efter Malmö
+const MILSTENAR = Array.from({ length: 30 }, (_, i) => ({
+  km: (i + 1) * 100,
+  namn: (i + 1) * 10 + ' mil',
+  ikon: (i + 1) % 10 === 0 ? '🏆' : '💯',
+  beloning: BELONINGAR[i % BELONINGAR.length],
+}));
+
+const MEDALJER = [...STADER, ...MILSTENAR].sort((a, b) => a.km - b.km).map(m => ({ ...m, valor: m.km < 50 ? 'brons' : m.km < 300 ? 'silver' : m.km < 1000 ? 'guld' : 'diamant' }));
 
 const PEPP = [
   'Varje steg räknas.',
@@ -138,7 +155,10 @@ function rita() {
     $('nasta-namn').textContent = nasta.namn;
     $('nasta-fylld').style.width = (andel * 100) + '%';
     $('nasta-text').textContent = `${fmt(nasta.km - s.totalKm)} km kvar`;
-    $('nasta-beloning').textContent = nasta.beloning ? `🎁 Då bjuder ${GIVARE} på ${nasta.beloning}!` : '';
+    const present = MEDALJER.find(m => m.beloning && s.totalKm < m.km);
+    $('nasta-beloning').textContent = nasta.beloning
+      ? `🎁 Då bjuder ${GIVARE} på ${nasta.beloning}!`
+      : present ? `🎁 ${fmt(present.km - s.totalKm)} km kvar till nästa belöning från ${GIVARE}.` : '';
   } else {
     $('nasta-bild').innerHTML = medaljBild(MEDALJER[MEDALJER.length - 1]);
     $('nasta-namn').textContent = 'Alla medaljer är dina!';
