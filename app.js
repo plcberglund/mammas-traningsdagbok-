@@ -143,9 +143,6 @@ function rita() {
   const s = berakna();
 
   $('halsning').textContent = 'Hej ' + data.namn + '!';
-  const idag = dagNyckel(new Date());
-  const gattIdag = data.promenader.some(x => dagNyckel(new Date(x.datum)) === idag);
-  $('stor-pepp').textContent = gattIdag ? 'Snyggt jobbat idag! 🌟' : 'Nu kör vi! 💪';
   $('dagens-pepp').textContent = s.antal === 0
     ? 'Första medaljen är bara en kilometer bort.'
     : PEPP[new Date().getDate() % PEPP.length];
