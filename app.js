@@ -5,25 +5,29 @@ const LAGRING = 'mammas-promenader-v1';
 const $ = id => document.getElementById(id);
 const fmt = (n, dec = 1) => n.toLocaleString('sv-SE', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 
+// Den som bjuder på belöningarna
+const GIVARE = 'Linus';
+
 // Medaljerna är en enda stege efter total sträcka. Täta i början så att
 // första veckan ger flera, sen längre mellan. Städerna är en låtsasresa
 // norrut från Stockholm. Byt gärna ut mot en resa som passar Hjördis.
+// Medaljer med "beloning" ger en riktig present från GIVARE.
 const MEDALJER = [
   { km: 1, namn: 'Första kilometern', ikon: '👟' },
   { km: 5, namn: 'Fem kilometer', ikon: '🌱' },
-  { km: 10, namn: 'En hel mil', ikon: '🥾' },
+  { km: 10, namn: 'En hel mil', ikon: '🥾', beloning: 'en fika' },
   { km: 21.1, namn: 'Halvmaraton', ikon: '🏃‍♀️' },
-  { km: 42.2, namn: 'Maraton', ikon: '🏅' },
+  { km: 42.2, namn: 'Maraton', ikon: '🏅', beloning: 'en lunch ute' },
   { km: 70, namn: 'Framme i Uppsala', ikon: '🏰' },
-  { km: 100, namn: 'Hundra kilometer', ikon: '💯' },
+  { km: 100, namn: 'Hundra kilometer', ikon: '💯', beloning: 'en biokväll' },
   { km: 180, namn: 'Framme i Gävle', ikon: '🐐' },
   { km: 300, namn: 'Framme i Hudiksvall', ikon: '🌊' },
   { km: 395, namn: 'Framme i Sundsvall', ikon: '🌉' },
-  { km: 500, namn: 'Femhundra kilometer', ikon: '⭐' },
+  { km: 500, namn: 'Femhundra kilometer', ikon: '⭐', beloning: 'en utflykt, du väljer vart' },
   { km: 640, namn: 'Framme i Umeå', ikon: '🌳' },
   { km: 900, namn: 'Framme i Luleå', ikon: '❄️' },
-  { km: 1000, namn: 'Tusen kilometer', ikon: '🏆' },
-  { km: 1250, namn: 'Framme i Kiruna', ikon: '🌌' },
+  { km: 1000, namn: 'Tusen kilometer', ikon: '🏆', beloning: 'en middag på restaurang' },
+  { km: 1250, namn: 'Framme i Kiruna', ikon: '🌌', beloning: 'en stor överraskning' },
 ].map(m => ({ ...m, valor: m.km < 50 ? 'brons' : m.km < 300 ? 'silver' : m.km < 1000 ? 'guld' : 'diamant' }));
 
 const PEPP = [
@@ -106,7 +110,8 @@ function medaljDatum() {
 }
 
 function medaljBild(m, stor = false) {
-  return `<span class="medalj-bild ${m.valor}${stor ? ' stor' : ''}"><span>${m.ikon}</span></span>`;
+  const present = m.beloning ? '<span class="present" aria-label="Belöning">🎁</span>' : '';
+  return `<span class="medalj-bild ${m.valor}${stor ? ' stor' : ''}"><span>${m.ikon}</span>${present}</span>`;
 }
 
 // ---------- Visning ----------
@@ -127,11 +132,13 @@ function rita() {
     $('nasta-namn').textContent = nasta.namn;
     $('nasta-fylld').style.width = (andel * 100) + '%';
     $('nasta-text').textContent = `${fmt(nasta.km - s.totalKm)} km kvar`;
+    $('nasta-beloning').textContent = nasta.beloning ? `🎁 Då bjuder ${GIVARE} på ${nasta.beloning}!` : '';
   } else {
     $('nasta-bild').innerHTML = medaljBild(MEDALJER[MEDALJER.length - 1]);
     $('nasta-namn').textContent = 'Alla medaljer är dina!';
     $('nasta-fylld').style.width = '100%';
     $('nasta-text').textContent = `${fmt(s.totalKm)} km. Helt otroligt.`;
+    $('nasta-beloning').textContent = '';
   }
 
   // Veckoring
@@ -202,6 +209,7 @@ $('medaljer').addEventListener('click', e => {
   $('firande-text').textContent = tagen
     ? `Du tog den när du hade gått ${fmt(m.km)} km, ${new Date(tagen).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}.`
     : `Den får du när du har gått ${fmt(m.km)} km totalt.\n${fmt(kvar)} km kvar.`;
+  if (m.beloning) $('firande-text').textContent += `\n\n🎁 Belöning: ${GIVARE} bjuder på ${m.beloning}.`;
   $('firande-stang').textContent = 'Stäng';
   $('firande').hidden = false;
 });
@@ -285,7 +293,9 @@ function fira(fore, efter, nya) {
   $('firande-rubrik').textContent = nya.length
     ? `${nya.length === 1 ? 'Ny medalj' : nya.length + ' nya medaljer'}, ${data.namn}!`
     : `Bra jobbat, ${data.namn}!`;
-  $('firande-text').textContent = [...nya.map(m => m.namn), ...(nya.length ? [''] : []), ...rader].join('\n');
+  const presenter = nya.filter(m => m.beloning)
+    .map(m => `🎁 Du har vunnit ${m.beloning}! Ring ${GIVARE} och säg till.`);
+  $('firande-text').textContent = [...nya.map(m => m.namn), ...presenter, ...(nya.length ? [''] : []), ...rader].join('\n');
   $('firande-stang').textContent = 'Tack!';
   $('firande').hidden = false;
   konfetti(nya.length ? 260 : 140);

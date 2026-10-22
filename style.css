@@ -113,6 +113,11 @@ button { font: inherit; cursor: pointer; }
 .nasta-info strong { display: block; font-size: 1.2rem; }
 .mal-bar { height: 14px; background: var(--gron-ljus); border-radius: 5px; margin: 6px 0 4px; overflow: hidden; }
 .mal-bar div { height: 100%; background: var(--gron); border-radius: 5px; }
+.nasta-beloning { display: block; margin-top: 4px; font-weight: 600; color: var(--rosa); }
+.nasta-beloning:empty { display: none; }
+.present { position: absolute; right: -6px; bottom: -4px; font-size: 1.1rem; filter: none; }
+.medalj-bild.stor .present { font-size: 2rem; right: -8px; bottom: -6px; }
+.medalj.last .medalj-bild .present { filter: none; }
 .mal-kvar { font-size: 1.05rem; color: var(--dampad); }
 
 .historik { list-style: none; margin: 0; padding: 0; }
