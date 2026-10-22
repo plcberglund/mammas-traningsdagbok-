@@ -16,8 +16,8 @@ const GIVARE = 'Linus';
 const BELONINGAR = [
   'en fika på stan',
   'en lunch ute',
-  'en biokväll',
   'en blombukett',
+  'en biokväll',
   'en utflykt, du väljer vart',
   'en middag på restaurang',
 ];
