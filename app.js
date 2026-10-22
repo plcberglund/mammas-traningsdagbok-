@@ -49,7 +49,7 @@ function laddaData() {
     const d = JSON.parse(localStorage.getItem(LAGRING));
     if (d && Array.isArray(d.promenader)) return d;
   } catch (e) { /* tom eller trasig lagring */ }
-  return { namn: 'Mamma', veckomal: 10, promenader: [] };
+  return { namn: 'Hjördis', veckomal: 10, promenader: [] };
 }
 
 function sparaData() {
@@ -300,7 +300,7 @@ $('historik').addEventListener('click', e => {
 
 $('namn').value = data.namn;
 $('mal').value = data.veckomal;
-$('namn').addEventListener('change', e => { data.namn = e.target.value.trim() || 'Mamma'; sparaData(); rita(); });
+$('namn').addEventListener('change', e => { data.namn = e.target.value.trim() || 'Hjördis'; sparaData(); rita(); });
 $('mal').addEventListener('change', e => { data.veckomal = Math.max(1, Number(e.target.value) || 10); sparaData(); rita(); });
 
 $('exportera').addEventListener('click', () => {
