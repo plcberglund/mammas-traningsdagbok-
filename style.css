@@ -1,0 +1,123 @@
+:root {
+  --bakgrund: #f7f3ea;
+  --kort: #ffffff;
+  --text: #24302a;
+  --dampad: #5b6660;
+  --gron: #2f6f4f;
+  --gron-ljus: #d8eadf;
+  --guld: #e0a526;
+  --rosa: #d9546a;
+  --kant: #e4ddd0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bakgrund);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 20px;
+  line-height: 1.45;
+}
+
+header { padding: 28px 16px 8px; text-align: center; }
+h1 { margin: 0; font-size: 2rem; }
+h2 { margin: 0 0 12px; font-size: 1.3rem; }
+.pepp { margin: 6px 0 0; color: var(--dampad); font-size: 1.1rem; }
+.hjalp { color: var(--dampad); font-size: 0.95rem; margin: 0 0 16px; }
+
+main { max-width: 640px; margin: 0 auto; padding: 8px 16px 48px; display: grid; gap: 16px; }
+
+.kort {
+  background: var(--kort);
+  border: 1px solid var(--kant);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+button { font: inherit; cursor: pointer; }
+
+.falt { margin-bottom: 18px; }
+.etikett { display: block; font-weight: 600; margin-bottom: 6px; }
+.stegare { display: flex; align-items: center; gap: 12px; }
+.stegare button {
+  width: 64px; height: 64px; border-radius: 50%;
+  border: 2px solid var(--gron); background: var(--gron-ljus); color: var(--gron);
+  font-size: 2rem; line-height: 1;
+}
+.stegare output { font-size: 2.4rem; font-weight: 700; min-width: 3.2ch; text-align: center; font-variant-numeric: tabular-nums; }
+.enhet { font-size: 1.2rem; color: var(--dampad); margin-left: -6px; }
+
+.stor-knapp {
+  width: 100%; padding: 20px; border: 0; border-radius: 16px;
+  background: var(--gron); color: #fff; font-size: 1.4rem; font-weight: 700;
+}
+.stor-knapp:active { transform: scale(0.98); }
+
+.vecka-rad { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.ring { position: relative; width: 150px; height: 150px; flex-shrink: 0; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 12; }
+.ring-bakgrund { stroke: var(--gron-ljus); }
+.ring-fylld { stroke: var(--gron); stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+.ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-text strong { font-size: 2rem; }
+.ring-text span { font-size: 0.9rem; color: var(--dampad); }
+.vecka-text { flex: 1; min-width: 180px; margin: 0; font-size: 1.1rem; }
+
+.resa-text { margin: 0 0 22px; font-size: 1.1rem; }
+.resa-bar { position: relative; height: 18px; background: var(--gron-ljus); border-radius: 9px; }
+.resa-fylld { height: 100%; background: var(--gron); border-radius: 9px; width: 0; transition: width 0.8s ease; }
+.resa-figur { position: absolute; top: -30px; font-size: 1.8rem; transform: translateX(-50%) scaleX(-1); transition: left 0.8s ease; }
+.resa-ander { display: flex; justify-content: space-between; margin-top: 8px; color: var(--dampad); font-size: 0.95rem; }
+
+.rutor { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ruta { background: var(--bakgrund); border-radius: 14px; padding: 14px; text-align: center; }
+.ruta strong { display: block; font-size: 1.9rem; font-variant-numeric: tabular-nums; }
+.ruta span { color: var(--dampad); font-size: 0.95rem; }
+
+.diagram { display: flex; align-items: flex-end; gap: 8px; height: 180px; }
+.stapel { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.stapel-varde { font-size: 0.8rem; color: var(--dampad); }
+.stapel-kropp { width: 100%; background: var(--gron); border-radius: 6px 6px 0 0; min-height: 2px; }
+.stapel.nu .stapel-kropp { background: var(--guld); }
+.stapel-namn { font-size: 0.75rem; color: var(--dampad); margin-top: 4px; }
+
+.medaljer { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 12px; }
+.medalj { text-align: center; padding: 10px 6px; border-radius: 14px; background: var(--bakgrund); }
+.medalj .ikon { font-size: 2.2rem; display: block; }
+.medalj .namn { font-size: 0.8rem; }
+.medalj.last { opacity: 0.35; filter: grayscale(1); }
+
+.historik { list-style: none; margin: 0; padding: 0; }
+.historik li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--kant); }
+.historik li:last-child { border-bottom: 0; }
+.historik .datum { color: var(--dampad); font-size: 0.95rem; }
+.historik .ta-bort { border: 0; background: none; color: var(--dampad); font-size: 1.2rem; padding: 6px 10px; }
+.tomt { color: var(--dampad); }
+
+.installningar summary { font-weight: 600; cursor: pointer; }
+.installningar label { display: block; margin-top: 14px; }
+.installningar input[type=text], .installningar input[type=number] {
+  display: block; width: 100%; margin-top: 4px; padding: 12px; font: inherit;
+  border: 1px solid var(--kant); border-radius: 10px;
+}
+.knapprad { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 10px; }
+.knapprad button, .knapp-fil {
+  padding: 12px 16px; border-radius: 12px; border: 1px solid var(--gron);
+  background: #fff; color: var(--gron); font-size: 1rem; margin: 0 !important;
+}
+.knapp-fil input { display: none; }
+
+.firande {
+  position: fixed; inset: 0; background: rgba(20, 30, 25, 0.55);
+  display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10;
+}
+.firande[hidden] { display: none; }
+.firande-ruta { background: #fff; border-radius: 24px; padding: 28px 22px; max-width: 440px; width: 100%; text-align: center; }
+.firande-emoji { font-size: 4rem; }
+.firande-ruta h2 { font-size: 1.7rem; }
+.firande-ruta p { font-size: 1.15rem; white-space: pre-line; }
+
+#konfetti { position: fixed; inset: 0; pointer-events: none; z-index: 11; width: 100%; height: 100%; }

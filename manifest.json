@@ -1,0 +1,9 @@
+{
+  "name": "Mammas promenader",
+  "short_name": "Promenader",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f7f3ea",
+  "theme_color": "#2f6f4f",
+  "icons": [{ "src": "ikon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
