@@ -401,5 +401,58 @@ function konfetti(antal = 140) {
   })(performance.now());
 }
 
+// ---------- Startskärmen ----------
+
+// Android/Chrome låter sidan öppna installationsrutan själv. iPhone gör
+// det inte, där visar knappen i stället hur man gör i Safari.
+let installation = null;
+const arInstallerad = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const arIphone = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+$('installera').hidden = arInstallerad();
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installation = e;
+});
+window.addEventListener('appinstalled', () => { $('installera').hidden = true; });
+
+function visaInstruktion(rubrik, steg) {
+  $('firande-emoji').textContent = '📲';
+  $('firande-rubrik').textContent = rubrik;
+  $('firande-text').innerHTML = `<ol class="steg-lista">${steg.map(x => `<li>${x}</li>`).join('')}</ol>`;
+  $('firande-stang').textContent = 'Okej';
+  $('firande').hidden = false;
+}
+
+$('installera-knapp').addEventListener('click', async () => {
+  if (installation) {
+    installation.prompt();
+    const { outcome } = await installation.userChoice;
+    installation = null;
+    if (outcome === 'accepted') $('installera').hidden = true;
+    return;
+  }
+  if (arIphone) {
+    visaInstruktion('Så gör du på iPhone', [
+      'Öppna sidan i <strong>Safari</strong>.',
+      'Tryck på dela-knappen <strong>⬆️</strong> längst ner (en ruta med en pil uppåt).',
+      'Scrolla ner och tryck på <strong>Lägg till på hemskärmen</strong>.',
+      'Tryck på <strong>Lägg till</strong> uppe till höger.',
+    ]);
+  } else {
+    visaInstruktion('Så gör du', [
+      'Tryck på menyn <strong>⋮</strong> uppe till höger i Chrome.',
+      'Tryck på <strong>Lägg till på startskärmen</strong> eller <strong>Installera app</strong>.',
+      'Tryck på <strong>Lägg till</strong>.',
+    ]);
+  }
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
 visaVarden();
 rita();

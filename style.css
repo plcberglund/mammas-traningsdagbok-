@@ -151,3 +151,9 @@ button { font: inherit; cursor: pointer; }
 .firande-ruta p { font-size: 1.15rem; white-space: pre-line; }
 
 #konfetti { position: fixed; inset: 0; pointer-events: none; z-index: 11; width: 100%; height: 100%; }
+
+.installera { background: var(--gron-ljus); border-color: var(--gron); }
+.installera p { margin: 0 0 14px; font-size: 1.1rem; }
+.installera[hidden] { display: none; }
+.steg-lista { text-align: left; font-size: 1.15rem; padding-left: 1.4em; margin: 0 0 20px; }
+.steg-lista li { margin-bottom: 12px; }

@@ -6,6 +6,9 @@
   <title>Hjördis promenader</title>
   <meta name="theme-color" content="#2f6f4f">
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="ikon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="Promenader">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,6 +18,11 @@
   </header>
 
   <main>
+    <section class="kort installera" id="installera" hidden>
+      <p>Lägg appen på startskärmen så hittar du den lätt varje gång.</p>
+      <button type="button" class="stor-knapp" id="installera-knapp">📲 Lägg till på startskärmen</button>
+    </section>
+
     <section class="kort" id="logga">
       <h2>Dagens promenad</h2>
       <p class="hjalp">Läs av rullbandet när du är klar och fyll i här.</p>
