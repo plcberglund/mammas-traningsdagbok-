@@ -11,7 +11,8 @@ const GIVARE = 'Linus';
 // första veckan ger flera, sen längre mellan. Städerna är en låtsasresa
 // från Umeå söderut längs E4, via Stockholm och Göteborg ner till Malmö.
 // Sträckorna är ungefärliga bilvägsavstånd från Umeå.
-// Varje tionde mil (100 km) ger dessutom en belöning från GIVARE.
+// Belöningarna från GIVARE kommer vid 100 km och sen var 150:e km
+// (100, 250, 400, 550 ...).
 // Belöningarna turas om i den ordning de står i listan.
 const BELONINGAR = [
   'en fika på stan',
@@ -43,13 +44,17 @@ const STADER = [
   { km: 1410, namn: 'Framme i Malmö', ikon: '🏙️' },
 ];
 
-// 10 mil, 20 mil och så vidare, så att belöningarna fortsätter efter Malmö
-const MILSTENAR = Array.from({ length: 30 }, (_, i) => ({
-  km: (i + 1) * 100,
-  namn: (i + 1) * 10 + ' mil',
-  ikon: (i + 1) % 10 === 0 ? '🏆' : '💯',
-  beloning: BELONINGAR[i % BELONINGAR.length],
-}));
+// Belöningsmedaljer: 10 mil, 25 mil, 40 mil och så vidare. De fortsätter
+// en bra bit efter Malmö så att det alltid finns en nästa.
+const MILSTENAR = Array.from({ length: 20 }, (_, i) => {
+  const km = 100 + i * 150;
+  return {
+    km,
+    namn: km / 10 + ' mil',
+    ikon: km === 100 ? '💯' : km % 1000 === 0 ? '🏆' : '⭐',
+    beloning: BELONINGAR[i % BELONINGAR.length],
+  };
+});
 
 const MEDALJER = [...STADER, ...MILSTENAR].sort((a, b) => a.km - b.km).map(m => ({ ...m, valor: m.km < 50 ? 'brons' : m.km < 300 ? 'silver' : m.km < 1000 ? 'guld' : 'diamant' }));
 
@@ -190,6 +195,7 @@ function rita() {
   $('langst').textContent = fmt(s.langst);
 
   ritaDiagram(s);
+  ritaBeloningar(s);
   ritaMedaljer(s);
   ritaHistorik();
 }
@@ -210,6 +216,43 @@ function ritaDiagram(s) {
       <span class="stapel-namn">${v.nu ? 'Nu' : 'v' + veckoNummer(v.d)}</span>
     </div>`).join('');
 }
+
+// Belöningsstegen: nästa belöning överst, de upplåsta under. Belöningar
+// längre fram syns inte förrän den närmaste är upplåst.
+function ritaBeloningar(s) {
+  const datum = medaljDatum();
+  const alla = MEDALJER.filter(m => m.beloning);
+  const upplasta = alla.filter(m => s.totalKm >= m.km).reverse();
+  const nasta = alla.find(m => s.totalKm < m.km);
+  const forra = upplasta[0];
+
+  let html = '';
+  if (nasta) {
+    const fran = forra ? forra.km : 0;
+    const andel = Math.max(0, (s.totalKm - fran) / (nasta.km - fran));
+    html += `<li class="steg nasta-steg">
+      <span class="steg-ikon">🎁</span>
+      <div class="steg-info">
+        <span class="steg-km">Vid ${nasta.km} km</span>
+        <strong>${forsta(nasta.beloning)}</strong>
+        <div class="mal-bar"><div style="width:${Math.min(100, andel * 100)}%"></div></div>
+        <span class="mal-kvar">${fmt(nasta.km - s.totalKm)} km kvar</span>
+      </div>
+    </li>`;
+  }
+  html += upplasta.map(m => `<li class="steg upplast">
+      <span class="steg-ikon">✅</span>
+      <div class="steg-info">
+        <span class="steg-km">Vid ${m.km} km</span>
+        <strong>${forsta(m.beloning)}</strong>
+        <span class="mal-kvar">Upplåst ${new Date(datum.get(m.km)).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' })}</span>
+      </div>
+    </li>`).join('');
+  $('beloningar').innerHTML = html;
+  $('beloningar-antal').textContent = upplasta.length ? `${upplasta.length} upplåsta` : '';
+}
+
+const forsta = t => t.charAt(0).toUpperCase() + t.slice(1);
 
 let senasteDatum = new Map();
 

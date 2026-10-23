@@ -172,3 +172,17 @@ button { font: inherit; cursor: pointer; }
 .spara-installningar { margin-top: 18px; }
 .sparat { margin: 10px 0 0; text-align: center; font-weight: 700; color: var(--gron); font-size: 1.15rem; }
 .sparat[hidden] { display: none; }
+
+.stege { list-style: none; margin: 0; padding: 0; position: relative; }
+.stege::before { content: ''; position: absolute; left: 23px; top: 24px; bottom: 24px; width: 4px; background: var(--gron-ljus); border-radius: 2px; }
+.steg { position: relative; display: flex; gap: 14px; align-items: flex-start; padding: 10px 0; }
+.steg-ikon {
+  position: relative; z-index: 1; flex-shrink: 0; width: 50px; height: 50px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 1.5rem; background: var(--bakgrund);
+}
+.nasta-steg .steg-ikon { background: #fde7ea; box-shadow: 0 0 0 3px var(--rosa); }
+.steg-info { flex: 1; min-width: 0; padding-top: 2px; }
+.steg-info strong { display: block; font-size: 1.2rem; }
+.steg-km { font-size: 0.9rem; color: var(--dampad); }
+.nasta-steg strong { color: var(--rosa); }
+.upplast .steg-info strong { color: var(--gron); }
