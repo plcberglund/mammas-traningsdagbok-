@@ -368,9 +368,24 @@ $('historik').addEventListener('click', e => {
 $('namn').value = data.namn;
 $('mal').value = data.veckomal;
 $('telefon').value = data.telefon || '';
-$('telefon').addEventListener('change', e => { data.telefon = e.target.value.trim(); sparaData(); });
-$('namn').addEventListener('change', e => { data.namn = e.target.value.trim() || 'Hjördis'; sparaData(); rita(); });
-$('mal').addEventListener('change', e => { data.veckomal = Math.max(1, Number(e.target.value) || 10); sparaData(); rita(); });
+function sparaInstallningar() {
+  data.namn = $('namn').value.trim() || 'Hjördis';
+  data.veckomal = Math.max(1, Number($('mal').value) || 10);
+  data.telefon = $('telefon').value.trim();
+  sparaData();
+  rita();
+}
+
+// Fälten sparas även när man lämnar dem, men knappen gör det tydligt
+['namn', 'mal', 'telefon'].forEach(id => $(id).addEventListener('change', sparaInstallningar));
+let sparatTimer;
+$('spara-installningar').addEventListener('click', () => {
+  sparaInstallningar();
+  document.activeElement.blur();
+  $('sparat').hidden = false;
+  clearTimeout(sparatTimer);
+  sparatTimer = setTimeout(() => { $('sparat').hidden = true; }, 4000);
+});
 
 $('exportera').addEventListener('click', () => {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

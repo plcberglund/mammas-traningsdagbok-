@@ -168,3 +168,7 @@ button { font: inherit; cursor: pointer; }
   display: block; width: 100%; margin-top: 4px; padding: 12px; font: inherit;
   border: 1px solid var(--kant); border-radius: 10px;
 }
+
+.spara-installningar { margin-top: 18px; }
+.sparat { margin: 10px 0 0; text-align: center; font-weight: 700; color: var(--gron); font-size: 1.15rem; }
+.sparat[hidden] { display: none; }
