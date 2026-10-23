@@ -11,16 +11,17 @@ const GIVARE = 'Linus';
 // första veckan ger flera, sen längre mellan. Städerna är en låtsasresa
 // från Umeå söderut längs E4, via Stockholm och Göteborg ner till Malmö.
 // Sträckorna är ungefärliga bilvägsavstånd från Umeå.
-// Belöningarna från GIVARE kommer vid 100 km och sen var 150:e km
-// (100, 250, 400, 550 ...).
-// Belöningarna turas om i den ordning de står i listan.
+// Belöningstrappan från GIVARE: åtta steg där avståndet mellan stegen
+// växer med ungefär 20 procent varje gång. Sträcka i km och belöning.
 const BELONINGAR = [
-  'en fika på stan',
-  'en lunch ute',
-  'en blombukett',
-  'en biokväll',
-  'en utflykt, du väljer vart',
-  'en middag på restaurang',
+  { km: 100, beloning: 'en fika på stan' },
+  { km: 220, beloning: 'en lunch ute' },
+  { km: 360, beloning: 'en blombukett' },
+  { km: 530, beloning: 'en biokväll' },
+  { km: 740, beloning: 'en utflykt, du väljer vart' },
+  { km: 990, beloning: 'en middag på restaurang' },
+  { km: 1290, beloning: 'en spadag' },
+  { km: 1650, beloning: 'en stor överraskning' },
 ];
 
 const STADER = [
@@ -34,7 +35,7 @@ const STADER = [
   { km: 113, namn: 'Framme i Örnsköldsvik', ikon: '⛰️' },
   { km: 225, namn: 'Framme i Härnösand', ikon: '⛪' },
   { km: 275, namn: 'Framme i Sundsvall', ikon: '🌉' },
-  { km: 360, namn: 'Framme i Hudiksvall', ikon: '🌊' },
+  { km: 350, namn: 'Framme i Hudiksvall', ikon: '🌊' },
   { km: 485, namn: 'Framme i Gävle', ikon: '🐐' },
   { km: 585, namn: 'Framme i Uppsala', ikon: '🏰' },
   { km: 655, namn: 'Framme i Stockholm', ikon: '👑' },
@@ -44,17 +45,11 @@ const STADER = [
   { km: 1410, namn: 'Framme i Malmö', ikon: '🏙️' },
 ];
 
-// Belöningsmedaljer: 10 mil, 25 mil, 40 mil och så vidare. De fortsätter
-// en bra bit efter Malmö så att det alltid finns en nästa.
-const MILSTENAR = Array.from({ length: 20 }, (_, i) => {
-  const km = 100 + i * 150;
-  return {
-    km,
-    namn: km / 10 + ' mil',
-    ikon: km === 100 ? '💯' : km % 1000 === 0 ? '🏆' : '⭐',
-    beloning: BELONINGAR[i % BELONINGAR.length],
-  };
-});
+const MILSTENAR = BELONINGAR.map((b, i) => ({
+  ...b,
+  namn: b.km / 10 + ' mil',
+  ikon: i === BELONINGAR.length - 1 ? '🏆' : i === 0 ? '💯' : '⭐',
+}));
 
 const MEDALJER = [...STADER, ...MILSTENAR].sort((a, b) => a.km - b.km).map(m => ({ ...m, valor: m.km < 50 ? 'brons' : m.km < 300 ? 'silver' : m.km < 1000 ? 'guld' : 'diamant' }));
 
