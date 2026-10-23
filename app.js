@@ -217,39 +217,48 @@ function ritaDiagram(s) {
     </div>`).join('');
 }
 
-// Belöningsstegen: nästa belöning överst, de upplåsta under. Belöningar
-// längre fram syns inte förrän den närmaste är upplåst.
+// Belöningsstegen visar alla steg i ordning. Upplåsta och den närmaste
+// syns i klartext, de som ligger längre fram är hemliga tills det är dags.
 function ritaBeloningar(s) {
   const datum = medaljDatum();
   const alla = MEDALJER.filter(m => m.beloning);
-  const upplasta = alla.filter(m => s.totalKm >= m.km).reverse();
   const nasta = alla.find(m => s.totalKm < m.km);
-  const forra = upplasta[0];
+  const upplasta = alla.filter(m => s.totalKm >= m.km);
+  const forra = upplasta[upplasta.length - 1];
 
-  let html = '';
-  if (nasta) {
-    const fran = forra ? forra.km : 0;
-    const andel = Math.max(0, (s.totalKm - fran) / (nasta.km - fran));
-    html += `<li class="steg nasta-steg">
-      <span class="steg-ikon">🎁</span>
-      <div class="steg-info">
-        <span class="steg-km">Vid ${nasta.km} km</span>
-        <strong>${forsta(nasta.beloning)}</strong>
-        <div class="mal-bar"><div style="width:${Math.min(100, andel * 100)}%"></div></div>
-        <span class="mal-kvar">${fmt(nasta.km - s.totalKm)} km kvar</span>
-      </div>
-    </li>`;
-  }
-  html += upplasta.map(m => `<li class="steg upplast">
-      <span class="steg-ikon">✅</span>
+  $('beloningar').innerHTML = alla.map(m => {
+    if (s.totalKm >= m.km) {
+      return `<li class="steg upplast">
+        <span class="steg-ikon">✅</span>
+        <div class="steg-info">
+          <span class="steg-km">Vid ${m.km} km</span>
+          <strong>${forsta(m.beloning)}</strong>
+          <span class="mal-kvar">Upplåst ${new Date(datum.get(m.km)).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' })}</span>
+        </div>
+      </li>`;
+    }
+    if (m === nasta) {
+      const fran = forra ? forra.km : 0;
+      const andel = Math.max(0, (s.totalKm - fran) / (m.km - fran));
+      return `<li class="steg nasta-steg">
+        <span class="steg-ikon">🎁</span>
+        <div class="steg-info">
+          <span class="steg-km">Vid ${m.km} km</span>
+          <strong>${forsta(m.beloning)}</strong>
+          <div class="mal-bar"><div style="width:${Math.min(100, andel * 100)}%"></div></div>
+          <span class="mal-kvar">${fmt(m.km - s.totalKm)} km kvar</span>
+        </div>
+      </li>`;
+    }
+    return `<li class="steg last-steg">
+      <span class="steg-ikon">🔒</span>
       <div class="steg-info">
         <span class="steg-km">Vid ${m.km} km</span>
-        <strong>${forsta(m.beloning)}</strong>
-        <span class="mal-kvar">Upplåst ${new Date(datum.get(m.km)).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long' })}</span>
+        <strong>Hemlig belöning</strong>
       </div>
-    </li>`).join('');
-  $('beloningar').innerHTML = html;
-  $('beloningar-antal').textContent = upplasta.length ? `${upplasta.length} upplåsta` : '';
+    </li>`;
+  }).join('');
+  $('beloningar-antal').textContent = `${upplasta.length} av ${alla.length}`;
 }
 
 const forsta = t => t.charAt(0).toUpperCase() + t.slice(1);
@@ -280,7 +289,14 @@ $('medaljer').addEventListener('click', e => {
   $('firande-text').textContent = tagen
     ? `Du tog den när du hade gått ${fmt(m.km)} km, ${new Date(tagen).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}.`
     : `Den får du när du har gått ${fmt(m.km)} km totalt.\n${fmt(kvar)} km kvar.`;
-  if (m.beloning) $('firande-text').textContent += `\n\n🎁 Belöning: ${GIVARE} bjuder på ${m.beloning}.`;
+  if (m.beloning) {
+    // Belöningar längre fram än den närmaste är hemliga
+    const nastaPresent = MEDALJER.find(x => x.beloning && berakna().totalKm < x.km);
+    const synlig = tagen || m === nastaPresent;
+    $('firande-text').textContent += synlig
+      ? `\n\n🎁 Belöning: ${GIVARE} bjuder på ${m.beloning}.`
+      : '\n\n🎁 Här väntar en hemlig belöning.';
+  }
   $('firande-stang').textContent = 'Stäng';
   $('firande').hidden = false;
 });

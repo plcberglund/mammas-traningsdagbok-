@@ -8,7 +8,7 @@ Appen visar nästa medalj, veckomålet som en ring, totalsiffror, staplar vecka 
 
 Medaljerna följer en enda sak: hur långt hon har gått totalt. Första kilometern, fem kilometer, en mil, halvmaraton, maraton och sen städer på en låtsasresa från Umeå söderut längs E4, via Stockholm och Göteborg ner till Malmö (cirka 1400 km). Täta medaljer i början och glesare sen.
 
-Den första belöningen från Linus kommer vid 100 km, sen var 150:e km (250, 400, 550 och så vidare). Kortet "Belöningar från Linus" är en stege som visar nästa belöning och de som redan är upplåsta, men inte de som ligger längre fram. Belöningarna turas om enligt listan `BELONINGAR` i `app.js`, och de fortsätter även efter Malmö. De är märkta med 🎁, och när hon tar en står det att hon ska skicka ett sms till Linus. Efter varje pass finns en knapp "Berätta för Linus" som öppnar ett färdigt sms. Numret skrivs in under Inställningar på hennes telefon och ligger aldrig i koden. Namnet på den som bjuder står i `GIVARE`.
+Den första belöningen från Linus kommer vid 100 km, sen var 150:e km (250, 400, 550 och så vidare). Kortet "Belöningar från Linus" är en stege med alla belöningssteg. Upplåsta och den närmaste syns i klartext, de längre fram står som hemliga. Belöningarna turas om enligt listan `BELONINGAR` i `app.js`, och de fortsätter även efter Malmö. De är märkta med 🎁, och när hon tar en står det att hon ska skicka ett sms till Linus. Efter varje pass finns en knapp "Berätta för Linus" som öppnar ett färdigt sms. Numret skrivs in under Inställningar på hennes telefon och ligger aldrig i koden. Namnet på den som bjuder står i `GIVARE`.
 
 Kortet "Nästa medalj" visar hur långt det är kvar till nästa. Inga dagar-i-rad eller andra mål som kan brytas, en missad dag kostar ingenting.
 
