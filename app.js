@@ -12,16 +12,16 @@ const GIVARE = 'Linus';
 // från Umeå söderut längs E4, via Stockholm och Göteborg ner till Malmö.
 // Sträckorna är ungefärliga bilvägsavstånd från Umeå.
 // Belöningstrappan från GIVARE: åtta steg där avståndet mellan stegen
-// växer med ungefär 20 procent varje gång. Sträcka i km och belöning.
+// växer lite för varje steg. Första kommer tidigt så att vanan fastnar.
 const BELONINGAR = [
-  { km: 100, beloning: 'en fika på stan' },
-  { km: 220, beloning: 'en lunch ute' },
-  { km: 360, beloning: 'en blombukett' },
-  { km: 530, beloning: 'en biokväll' },
-  { km: 740, beloning: 'en utflykt, du väljer vart' },
-  { km: 990, beloning: 'en middag på restaurang' },
-  { km: 1290, beloning: 'en spadag' },
-  { km: 1650, beloning: 'en stor överraskning' },
+  { km: 50, beloning: 'en fika på stan' },
+  { km: 120, beloning: 'en lunch ute' },
+  { km: 200, beloning: 'en blombukett' },
+  { km: 300, beloning: 'en biokväll' },
+  { km: 420, beloning: 'en utflykt, du väljer vart' },
+  { km: 560, beloning: 'en middag på restaurang' },
+  { km: 720, beloning: 'en spadag' },
+  { km: 900, beloning: 'en stor överraskning' },
 ];
 
 const STADER = [
